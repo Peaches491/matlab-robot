@@ -7,7 +7,7 @@ defaultPos = [0 0 0 1]';
 addRequired(p,'robot');
 addOptional(p,'position',defaultPos,@isvector);
 addOptional(p,'end_link',defaultEnd,...
-     @(x) isnumeric(x) && x >= 0 && x <= size(robot, 2));
+     @(x) isnumeric(x) && x >= 0 && x <= robot.num_links());
 parse(p,robot,varargin{:});
 
 translation = robot.TF('end_link', p.Results.end_link) * p.Results.position; 
