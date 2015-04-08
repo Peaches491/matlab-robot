@@ -22,8 +22,8 @@ tf_scale = 0.2;
 plotSetup(0.90, 148, 15, 'perspective');
 plotArm(robot, current_data);
 
-for link = 1 : num_joints(robot)
-    plotCoordTrans(TF(robot, 'end_link', link, 'config', current_data), tf_scale);
+for link = 1 : robot.num_links()
+    plotCoordTrans(robot.TF('end_link', link, 'config', current_data), tf_scale);
 end
 
 
@@ -34,7 +34,7 @@ reset_btn = uicontrol('Style', 'pushbutton', ...
     'Callback', @surfbutton_Callback);
 
 sliders = [];
-for link = 1:size(robot, 2)
+for link = 1:robot.num_links()
     link_slider = uicontrol('Style','slider',...
         'String', strcat('Joint ', num2str(link)), ...
         'Position',[315, link*35, 100, 16], ...
@@ -70,8 +70,8 @@ function update_plot(link, value)
 
     plotArm_update(f(1:2), robot, current_data);
 
-    for link = 1 : num_joints(robot)
-        T = TF(robot, 'end_link', link, 'config', current_data);
+    for link = 1 : robot.num_links()
+        T = robot.TF('end_link', link, 'config', current_data);
         [p, R] = TF_Pos_Rot(T);
 
         plotCoord_update(f(link+2), p, R, tf_scale);
@@ -85,7 +85,7 @@ end
 function surfbutton_Callback(source,eventdata)
     cla(ha);
     current_data = [0, 0, 0, 0, 0, 0];
-    plotarm_replot(robot, current_data);
+    update_plot(0, 0)
 end
 
 end
