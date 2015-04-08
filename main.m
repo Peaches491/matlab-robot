@@ -20,15 +20,14 @@ r.add_link(F2, .5, theta2);
 %% Building Transformations
 robot = Build_Robot([F1; F2], [theta1, theta2]);
 T01 = r.TF('end_link', 1);
-T02 = r.TF('end_link', 1);
+T02 = r.TF('end_link', 2);
 T03 = r.TF('end_link', 2);
 
 
 
 %% Find Jacobian
 
-
-J = simplify(Jacobian(robot));
+J = simplify(r.Jacobian());
 
 
 %% Find Jacobian for each point mass
@@ -37,8 +36,8 @@ syms l1 lc1 l2 lc2;
 pos1 = [-(l1-lc1); 0; 0; 1];
 pos2 = [-(l2-lc2); 0; 0; 1];
 
-Jm1 = simplify(Jacobian(robot, 'end_link', 1, 'position', pos1));
-Jm2 = simplify(Jacobian(robot, 'end_link', 2, 'position', pos2));
+Jm1 = simplify(r.Jacobian('end_link', 1, 'position', pos1));
+Jm2 = simplify(r.Jacobian('end_link', 2, 'position', pos2));
 
 %% Calculate the Kinetic and Potential Energy For each point mass 
 syms theta1dot theta2dot;
