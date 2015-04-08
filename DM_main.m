@@ -50,5 +50,6 @@ end
 
 r.TF('config', [0, 0, 0, 0, 0, 0])
 
+r.Jacobian()
 
-simple_gui2(r);
+%simple_gui2(r);
