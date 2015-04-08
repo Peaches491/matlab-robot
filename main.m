@@ -10,34 +10,26 @@ F1 = [0 theta1 l1 0];
 F2 = [0 theta2 l2 0];
 % F3 = [0 theta3 l3 0];
 
-dh_params = [F1; F2]
+dh_params = [F1; F2];
 
+r = Robot();
+r.add_link(F1, 1, theta1);
+r.add_link(F2, .5, theta2);
 
 
 %% Building Transformations
 robot = Build_Robot([F1; F2], [theta1, theta2]);
-T01 = TFold(robot, 'end_link', 1);
-T02 = TFold(robot, 'end_link', 2);
-T03 = TFold(robot);
+T01 = r.TF('end_link', 1);
+T02 = r.TF('end_link', 1);
+T03 = r.TF('end_link', 2);
+
 
 
 %% Find Jacobian
-%Translational Part 
-translation03 = T02(1:3,4);
-Rotation03 = T02(1:3,1:3);
 
-% Trents Code
-Jv2 = [diff(translation03,theta1), diff(translation03,theta2)];
 
-%Rotational Part 
-Jw2 = [T01(1:3,3), T02(1:3,3)];  % Or 0 For a prismatic joint 
+J = simplify(Jacobian(robot));
 
-%6DOF Jacobian
-J2 = simple([Jv2; Jw2]);
-
-% My code
-
-J = simple(Jacobian(robot));
 
 %% Find Jacobian for each point mass
 syms l1 lc1 l2 lc2;
@@ -45,8 +37,8 @@ syms l1 lc1 l2 lc2;
 pos1 = [-(l1-lc1); 0; 0; 1];
 pos2 = [-(l2-lc2); 0; 0; 1];
 
-Jm1 = simple(Jacobian(robot, 'end_link', 1, 'position', pos1));
-Jm2 = simple(Jacobian(robot, 'end_link', 2, 'position', pos2));
+Jm1 = simplify(Jacobian(robot, 'end_link', 1, 'position', pos1));
+Jm2 = simplify(Jacobian(robot, 'end_link', 2, 'position', pos2));
 
 %% Calculate the Kinetic and Potential Energy For each point mass 
 syms theta1dot theta2dot;
@@ -85,4 +77,4 @@ K3 = simplify(1/2 * [theta1dot;theta2dot].' * ...
 
 K = K1 + K2 + K3;
 
-
+L = K - P
