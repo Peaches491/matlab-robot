@@ -9,10 +9,13 @@ classdef Robot < handle
     end
     
     methods
-        function [ obj ] = add_link(obj, dh, mass, joint_var)
+        function [ obj ] = add_link(obj, dh, mass, joint_var, is_prismatic)
+            if nargin < 5
+                is_prismatic = false;
+            end
             T = DHToMatrix_vec(dh);
             s = struct('DH', dh, 'mass', mass,... 
-                'T', T, 'q', joint_var);
+                'T', T, 'q', joint_var, 'prismatic', is_prismatic);
             obj.dh_params = [obj.dh_params, s];
         end
         
