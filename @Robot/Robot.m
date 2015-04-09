@@ -9,18 +9,12 @@ classdef Robot < handle
     end
     
     methods
-        function [ obj ] = add_link(obj, dh, mass, joint_var, is_prismatic)
-            if nargin < 5
-                is_prismatic = false;
-            end
-            T = DHToMatrix_vec(dh);
-            s = struct('DH', dh, 'mass', mass,... 
-                'T', T, 'q', joint_var, 'prismatic', is_prismatic);
-            obj.dh_params = [obj.dh_params, s];
-        end
-        
         function [n] = num_links(obj)
             n = size(obj.dh_params, 2);
+        end
+        
+        function [n] = num_joints(obj)
+            n = numel(obj.get_joint_vars());
         end
         
         function [T] = get_link_tf(obj, link_no)
@@ -28,11 +22,20 @@ classdef Robot < handle
         end
         
         function [q_vec] = get_joint_vars(obj)
-             q_vec = [obj.dh_params(:).q];
+            q_vec = [];
+            for q_idx = 1:obj.num_links()
+                if ~isempty(obj.dh_params(q_idx).q)
+                    q_vec = [q_vec, obj.dh_params(q_idx).q];
+                end
+            end
         end
         
-        function [q_var] = get_joint_var(obj, link_no)
-             q_var = obj.dh_params(link_no).q;
+        function [ has_var ] = has_joint_var(obj, link_no)
+            has_var = numel(obj.get_joint_var(link_no)) ~= 0;
+        end
+        
+        function [ q_var ] = get_joint_var(obj, link_no)
+            q_var = obj.dh_params(link_no).q;
         end
     end
 end

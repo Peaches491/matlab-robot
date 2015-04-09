@@ -17,12 +17,12 @@ ha.Units = 'normalized';
 
 
 % Create a plot in the axes.
-current_data = [0, 0, 0, 0, 0, 0];
-tf_scale = 0.2;
+current_data = zeros(1, robot.num_joints());
+tf_scale = 0.10;
 plotSetup(0.90, 148, 15, 'perspective');
 plotArm(robot, current_data);
 
-for link = 1 : robot.num_links()
+for link = 0 : robot.num_links()
     plotCoordTrans(robot.TF('end_link', link, 'config', current_data), tf_scale);
 end
 
@@ -34,7 +34,7 @@ reset_btn = uicontrol('Style', 'pushbutton', ...
     'Callback', @surfbutton_Callback);
 
 sliders = [];
-for link = 1:robot.num_links()
+for link = 1:robot.num_joints()
     link_slider = uicontrol('Style','slider',...
         'String', strcat('Joint ', num2str(link)), ...
         'Position',[315, link*35, 100, 16], ...
@@ -56,7 +56,7 @@ align([sliders; reset_btn],'Center','None');
 f.Name = 'Simple GUI';
 
 % Move the window to the center of the screen.
-movegui(f,'center')
+movegui(f,'center');
 
 % Make the window visible.
 f.Visible = 'on';
@@ -65,27 +65,25 @@ f.Visible = 'on';
     
 function update_plot(link, value)
     current_data(link) = value*2*pi - pi;
-
     f = flip(findobj(gcf()));
-
+    
     plotArm_update(f(1:2), robot, current_data);
 
-    for link = 1 : robot.num_links()
+    for link = 0 : robot.num_links()
         T = robot.TF('end_link', link, 'config', current_data);
         [p, R] = TF_Pos_Rot(T);
 
-        plotCoord_update(f(link+2), p, R, tf_scale);
+        plotCoord_update(f(link+3), p, R, tf_scale);
     end
 end
 
 function slider_callback(source, eventdata, link)
-    update_plot(link, source.Value)
+    update_plot(link, source.Value);
 end
 
 function surfbutton_Callback(source,eventdata)
-    cla(ha);
-    current_data = [0, 0, 0, 0, 0, 0];
-    update_plot(0, 0)
+    current_data = zeros(1, robot.num_links());
+    update_plot(1, 0.5);
 end
 
 end
