@@ -20,11 +20,10 @@ r = Robot();
 [rows, columns] = size(dh_params);
 for row = 1 : rows
     dh_param = dh_params(row, :);
-    
-    mass = 1.0/row;
     joint = sym_vec(row);
-    
-    r.add_link(dh_param, mass, 'joint_var', joint);
+    r.add_link(dh_param, 'joint_var', joint);
+    mass = 1/row;
+    r.add_mass(row, mass, [0, 0, 0]);
 end
 
 
@@ -40,9 +39,9 @@ F2 = [0 theta2  l1 0];
 F3 = [0      0  l2 0];
 
 r2 = Robot();
-r2.add_link(F1, 1, 'joint_var', theta1);
-r2.add_link(F2, .5, 'joint_var', theta2);
-r2.add_link(F3, .25);
+r2.add_link(F1, 'joint_var', theta1);
+r2.add_link(F2, 'joint_var', theta2);
+r2.add_link(F3);
 
 %r.TF('config', [0, 0, 0, 0, 0, 0])
 r.Jacobian()
