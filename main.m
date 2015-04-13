@@ -6,22 +6,23 @@ addpath 'Robot/'
 %% DH for Three link planner arm
 syms theta1 theta2; % theta3;
 syms l1 l2; % l3;
-F1 = [0 theta1 l1 0];
-F2 = [0 theta2 l2 0];
-% F3 = [0 theta3 l3 0];
+F1 = [0, theta1, l1,  0];
+F2 = [0, theta2, l2, 0];
+
 
 dh_params = [F1; F2];
 
 r = Robot();
-r.add_link(F1, 1, theta1);
-r.add_link(F2, .5, theta2);
+r.add_link(F1, 1, 'joint_var', theta1);
+r.add_link(F2, .5, 'joint_var', theta2);
+
 
 
 %% Building Transformations
 robot = Build_Robot([F1; F2], [theta1, theta2]);
-T01 = r.TF('end_link', 1);
-T02 = r.TF('end_link', 2);
-T03 = r.TF('end_link', 2);
+T01 = simplify(r.TF('end_link', 1));
+T02 = simplify(r.TF('end_link', 2));
+
 
 
 
@@ -41,20 +42,20 @@ Jm2 = simplify(r.Jacobian('end_link', 2, 'position', pos2));
 
 %% Calculate the Kinetic and Potential Energy For each point mass 
 syms theta1dot theta2dot;
-syms m1 m2 m3;
+syms m1 m2 mL;
 
 syms g
 
 translation0m1 = T01*pos1;
 translation0m2 = T02*pos2;
-translation03 = T03(1:3,4);
+translation0Tip = T02(1:3,4);
 
 Jvm1 = Jm1(1:3,:);
 Jvm2 = Jm2(1:3,:);
 Jv = J(1:3, :);
 
 
-P1 = -g *translation03(1) * m3;
+P1 = -g *translation0Tip(1) * mL;  %% What direction is gravity in the world frame??? pos X in this example 
 P2 = -g*translation0m1(1) * m1;
 P3 = -g*translation0m2(1) * m2;
 
@@ -71,9 +72,12 @@ K2 = simplify(1/2 * [theta1dot;theta2dot].' * ...
     * [theta1dot;theta2dot] );
 
 K3 = simplify(1/2 * [theta1dot;theta2dot].' * ...
-    (m3 * (Jv.' * Jv)) *...
+    (mL * (Jv.' * Jv)) *...
     [theta1dot;theta2dot] );
 
 K = K1 + K2 + K3;
 
-L = K - P
+L = simplify(K - P);
+
+%% 
+
