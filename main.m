@@ -5,6 +5,7 @@ addpath 'Robot/'
 
 %% DH for Three link planner arm
 syms theta1 theta2; % theta3;
+syms theta1dot theta2dot;
 syms l1 l2; % l3;
 F1 = [0, theta1, l1,  0];
 F2 = [0, theta2, l2, 0];
@@ -13,8 +14,8 @@ F2 = [0, theta2, l2, 0];
 dh_params = [F1; F2];
 
 r = Robot();
-r.add_link(F1, 'joint_var', theta1);
-r.add_link(F2, 'joint_var', theta2);
+r.add_link(F1, 'joint_var', theta1, 'joint_var_dot', theta1dot);
+r.add_link(F2, 'joint_var', theta2, 'joint_var_dot', theta2dot);
 
 
  
@@ -33,16 +34,22 @@ J = simplify(r.Jacobian());
 
 %% Find Jacobian for each point mass
 syms l1 lc1 l2 lc2;
+syms m1 m2 mL;
 
 pos1 = [-(l1-lc1); 0; 0; 1];
 pos2 = [-(l2-lc2); 0; 0; 1];
+
+r.add_mass(1, m1, [-(l1-lc1); 0; 0]');
+r.add_mass(2, m2, [-(l2-lc2); 0; 0]');
+r.add_mass(2, mL, [0; 0; 0]');
+
 
 Jm1 = simplify(r.Jacobian('end_link', 1, 'position', pos1));
 Jm2 = simplify(r.Jacobian('end_link', 2, 'position', pos2));
 
 %% Calculate the Kinetic and Potential Energy For each point mass 
-syms theta1dot theta2dot;
-syms m1 m2 mL;
+
+
 
 syms g
 
@@ -78,6 +85,7 @@ K3 = simplify(1/2 * [theta1dot;theta2dot].' * ...
 K = K1 + K2 + K3;
 
 L = simplify(K - P);
+L2 = r.Lagrangian();
 
 %% Lagrand Equations Of Motion 
 syms theta1t(t) theta2t(t) theta1dotdot theta2dotdot
