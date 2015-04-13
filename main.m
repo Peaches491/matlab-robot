@@ -13,11 +13,11 @@ F2 = [0, theta2, l2, 0];
 dh_params = [F1; F2];
 
 r = Robot();
-r.add_link(F1, 1, 'joint_var', theta1);
-r.add_link(F2, .5, 'joint_var', theta2);
+r.add_link(F1, 'joint_var', theta1);
+r.add_link(F2, 'joint_var', theta2);
 
 
-
+ 
 %% Building Transformations
 robot = Build_Robot([F1; F2], [theta1, theta2]);
 T01 = simplify(r.TF('end_link', 1));
@@ -86,8 +86,8 @@ qdot = [theta1dot theta2dot];
 qdotdot = [theta1dotdot theta2dotdot];
 
 qt = [theta1t(t) theta2t(t)];
-qtdot = [diff(theta1t(t),t) diff(theta2t(t),t)];
-qtdotdot = [diff(theta1t(t),t,t) diff(theta2t(t),t,t)];
+qtdot = diff(qt);
+qtdotdot = diff(qtdot);
 
 %% Repeat the block for each joint variable 
 A1 = diff(L, theta1dot);
@@ -126,4 +126,6 @@ V2 = simplify(Tau2 -(M21 * theta1dotdot + M22 * theta2dotdot + G2));
 
 Tau = [M11, M12; M21, M22] * qdotdot' + [V1; V2] + [G1; G2];
 
-M = [M11, M12; M21, M22]
+M = [M11, M12; M21, M22];
+
+simplify(M11 == l1^2*m2 + l1^2*mL + l2^2*mL + lc1^2*m1 + lc2^2*m2 + 2*l1*l2*mL*cos(theta2) + 2*l1*lc2*m2*cos(theta2));
