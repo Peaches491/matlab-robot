@@ -17,6 +17,14 @@ classdef Robot < handle
             n = numel(obj.get_joint_vars());
         end
         
+        function [n] = num_masses(obj, link_no)
+            n = size(obj.dh_params(link_no).masses, 1);
+        end
+        
+        function [n] = get_masses(obj, link_no)
+            n = obj.dh_params(link_no).masses;
+        end
+        
         function [T] = get_link_tf(obj, link_no)
             T = obj.dh_params(link_no).T;
         end
@@ -36,6 +44,10 @@ classdef Robot < handle
         
         function [ q_var ] = get_joint_var(obj, link_no)
             q_var = obj.dh_params(link_no).q;
+        end
+        
+        function [ q_var ] = get_joint_var_dot(obj, link_no)
+            q_var = obj.dh_params(link_no).qdot;
         end
     end
 end

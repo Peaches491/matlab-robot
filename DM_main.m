@@ -7,7 +7,9 @@ import Robot
 
 
 syms q1 q2 q3 q4 q5 q6;
-sym_vec = [q1 q2 q3 q4 q5 q6];
+sym_vec_dot = [q1 q2 q3 q4 q5 q6];
+syms q1dot q2dot q3dot q4dot q5dot q6dot;
+sym_vec = [q1dot q2dot q3dot q4dot q5dot q6dot];
 dh_params = [  0.000       q1  0.150      -pi/2;
                0.000  q2-pi/2  0.250      pi;
                0.000       q3  0.075   -pi/2;
@@ -19,10 +21,11 @@ r = Robot();
 
 [rows, columns] = size(dh_params);
 for row = 1 : rows
-    dh_param = dh_params(row, :);
-    joint = sym_vec(row);
-    r.add_link(dh_param, 'joint_var', joint);
-    mass = 1/row;
+    r.add_link(dh_params(row, :), ...
+        'joint_var', sym_vec(row), ...
+        'joint_var_dot', sym_vec_dot(row));
+    
+    mass = 1/row + 2.5;
     r.add_mass(row, mass, [0, 0, 0]);
 end
 
@@ -46,5 +49,8 @@ r2.add_link(F3);
 %r.TF('config', [0, 0, 0, 0, 0, 0])
 r.Jacobian()
 
-simple_gui2(r);
+%r.num_masses(1)
+r.Lagrangian();
+
+%simple_gui2(r);
 
