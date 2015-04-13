@@ -6,8 +6,8 @@ addpath 'Robot/'
 %% DH for Three link planner arm
 syms theta1 theta2; % theta3;
 syms l1 l2; % l3;
-F1 = [0, theta1, .1,  0];
-F2 = [0, theta2, .2, 0];
+F1 = [0, theta1, l1,  0];
+F2 = [0, theta2, l2, 0];
 
 
 dh_params = [F1; F2];
@@ -87,16 +87,43 @@ qdotdot = [theta1dotdot theta2dotdot];
 
 qt = [theta1t(t) theta2t(t)];
 qtdot = [diff(theta1t(t),t) diff(theta2t(t),t)];
-qt = [diff(theta1t(t),t,t) diff(theta2t(t),t,t)];
+qtdotdot = [diff(theta1t(t),t,t) diff(theta2t(t),t,t)];
 
-
+%% Repeat the block for each joint variable 
 A1 = diff(L, theta1dot);
-A1t = subs(A1, [q qdot], [qt dtdot]);
+A1t = subs(A1, [q qdot], [qt qtdot]);
 B1 = diff(L, theta1);
-B1t = subs(B1, [q qdot], [qt dtdot]);
+B1t = subs(B1, [q qdot], [qt qtdot]);
 
 Tau1t = diff(A1t, t) - B1t;
 Tau1 = simplify(subs(Tau1t, [qt qtdot qtdotdot], [q qdot qdotdot]));
+%%
 
+A2 = diff(L, theta2dot);
+A2t = subs(A2, [q qdot], [qt qtdot]);
+B2 = diff(L, theta2);
+B2t = subs(B2, [q qdot], [qt qtdot]);
 
+Tau2t = diff(A2t, t) - B2t;
+Tau2 = simplify(subs(Tau2t, [qt qtdot qtdotdot], [q qdot qdotdot]));
 
+%% Mass Matrix 
+
+M11 = simplify(Tau1 -subs(Tau1, theta1dotdot, 0)) / theta1dotdot;
+M12 = simplify(Tau1 -subs(Tau1, theta2dotdot, 0)) / theta2dotdot;
+M21 = simplify(Tau2 -subs(Tau2, theta1dotdot, 0)) / theta1dotdot;
+M22 = simplify(Tau2 -subs(Tau2, theta2dotdot, 0)) / theta2dotdot;
+
+% Find all terms that don't depend on derivatives of DoFs. By zeroing out% everything that does
+G1 = simplify(subs(Tau1,{theta1dotdot,theta1dot,theta2dotdot,theta2dot},...
+    {0, 0, 0, 0}));
+G2 = simplify(subs(Tau2,{theta1dotdot,theta1dot,theta2dotdot,theta2dot},...
+    {0, 0, 0, 0}));
+
+% Find all terms no accounted for in M and G
+V1 = simplify(Tau1 -(M11 * theta1dotdot + M12 * theta2dotdot + G1));
+V2 = simplify(Tau2 -(M21 * theta1dotdot + M22 * theta2dotdot + G2));
+
+Tau = [M11, M12; M21, M22] * qdotdot' + [V1; V2] + [G1; G2];
+
+M = [M11, M12; M21, M22]
