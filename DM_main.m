@@ -47,7 +47,7 @@ r2.add_link(F2, 'joint_var', theta2);
 r2.add_link(F3);
 
 %r.TF('config', [0, 0, 0, 0, 0, 0])
-r.Jacobian()
+%r.Jacobian()
 
 %r.num_masses(1)
 r.Lagrangian();

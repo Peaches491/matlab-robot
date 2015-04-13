@@ -49,6 +49,15 @@ classdef Robot < handle
         function [ q_var ] = get_joint_var_dot(obj, link_no)
             q_var = obj.dh_params(link_no).qdot;
         end
+        
+        function [ q_vec ] = get_joint_vars_dot(obj)
+            q_vec = [];
+            for q_idx = 1:obj.num_links()
+                if ~isempty(obj.dh_params(q_idx).q)
+                    q_vec = [q_vec, obj.dh_params(q_idx).qdot];
+                end
+            end
+        end
     end
 end
 
