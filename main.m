@@ -6,8 +6,8 @@ addpath 'Robot/'
 %% DH for Three link planner arm
 syms theta1 theta2; % theta3;
 syms l1 l2; % l3;
-F1 = [0, theta1, l1,  0];
-F2 = [0, theta2, l2, 0];
+F1 = [0, theta1, .1,  0];
+F2 = [0, theta2, .2, 0];
 
 
 dh_params = [F1; F2];
@@ -79,5 +79,24 @@ K = K1 + K2 + K3;
 
 L = simplify(K - P);
 
-%% 
+%% Lagrand Equations Of Motion 
+syms theta1t(t) theta2t(t) theta1dotdot theta2dotdot
+q = [theta1 theta2];
+qdot = [theta1dot theta2dot];
+qdotdot = [theta1dotdot theta2dotdot];
+
+qt = [theta1t(t) theta2t(t)];
+qtdot = [diff(theta1t(t),t) diff(theta2t(t),t)];
+qt = [diff(theta1t(t),t,t) diff(theta2t(t),t,t)];
+
+
+A1 = diff(L, theta1dot);
+A1t = subs(A1, [q qdot], [qt dtdot]);
+B1 = diff(L, theta1);
+B1t = subs(B1, [q qdot], [qt dtdot]);
+
+Tau1t = diff(A1t, t) - B1t;
+Tau1 = simplify(subs(Tau1t, [qt qtdot qtdotdot], [q qdot qdotdot]));
+
+
 
