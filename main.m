@@ -4,9 +4,9 @@ addpath 'Plotting/'
 addpath 'Robot/'
 
 %% DH for Three link planner arm
-syms theta1 theta2; % theta3;
-syms theta1dot theta2dot;
-syms l1 l2; % l3;
+syms theta1 theta2 real; % theta3;
+syms theta1dot theta2dot real;
+syms l1 l2 real; % l3;
 F1 = [0, theta1, l1,  0];
 F2 = [0, theta2, l2, 0];
 
@@ -33,8 +33,8 @@ J = simplify(r.Jacobian());
 
 
 %% Find Jacobian for each point mass
-syms l1 lc1 l2 lc2;
-syms m1 m2 mL;
+syms l1 lc1 l2 lc2 real;
+syms m1 m2 mL real;
 
 pos1 = [-(l1-lc1); 0; 0; 1];
 pos2 = [-(l2-lc2); 0; 0; 1];
@@ -48,8 +48,6 @@ Jm1 = simplify(r.Jacobian('end_link', 1, 'position', pos1));
 Jm2 = simplify(r.Jacobian('end_link', 2, 'position', pos2));
 
 %% Calculate the Kinetic and Potential Energy For each point mass 
-
-
 
 syms g
 
