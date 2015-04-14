@@ -134,4 +134,5 @@ Tau = [M11, M12; M21, M22] * qdotdot' + [V1; V2] + [G1; G2];
 
 M = [M11, M12; M21, M22];
 
-simplify(M11 == l1^2*m2 + l1^2*mL + l2^2*mL + lc1^2*m1 + lc2^2*m2 + 2*l1*l2*mL*cos(theta2) + 2*l1*lc2*m2*cos(theta2));
+%simplify(M11 == l1^2*m2 + l1^2*mL + l2^2*mL + lc1^2*m1 + lc2^2*m2 + 2*l1*l2*mL*cos(theta2) + 2*l1*lc2*m2*cos(theta2));
+r.MotionEquations()
