@@ -3,16 +3,27 @@ function [ robot ] = add_link( robot, dh, varargin )
 
     addRequired(p,'robot');
     addRequired(p,'dh');
-    
     addParameter(p,'joint_var', [], @(a) ~isnumeric(a));
-    addParameter(p,'joint_var_dot', [], @(a) ~isnumeric(a));
     addParameter(p,'prismatic', false, @islogical);
 
     parse(p, robot, dh, varargin{:});
 
     T = DHToMatrix_vec(dh);
-    s = struct('DH', dh, 'masses', [], 'T', T, ...
-        'q', p.Results.joint_var, 'qdot', p.Results.joint_var_dot);
+    q = p.Results.joint_var;
+    q_t = sym(strcat([char(q), '(t)']));
+    qd = sym(strcat([char(q), 'd']), 'real');
+    qd_t = sym(strcat([char(q), 'd(t)']));
+    qdd = sym(strcat([char(q), 'dd']), 'real');
+    qdd_t = sym(strcat([char(q), 'dd(t)']));
+    s = struct('DH', dh, ...
+        'masses', [], ...
+        'T', T, ...
+        'q', q, ...
+        'q_t', q_t, ...
+        'qd', qd, ...
+        'qd_t', qd_t, ...
+        'qdd', qdd, ...
+        'qdd_t', qdd_t);
 
     robot.dh_params = [robot.dh_params, s];
         

@@ -56,7 +56,7 @@ if isempty(robot.function_cache{p.Results.start_link+1, p.Results.end_link+1})
     
     robot.sym_cache{idx_1, idx_2} = tf;
     if has_config
-        func = matlabFunction(tf, 'Vars', robot.get_joint_vars());
+        func = matlabFunction(tf, 'Vars', robot.get_joint_vars(0, false));
         robot.function_cache{idx_1, idx_2} = func;
     end
 end

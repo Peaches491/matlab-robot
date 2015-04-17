@@ -17,8 +17,8 @@ Jv = [];
 Jw = [];
 
 for link_no = 1:robot.num_links()
-    if robot.has_joint_var(link_no)
-        Jv = [Jv, diff(translation, robot.get_joint_var(link_no))];
+    if robot.has_joint_var(link_no, 0, false)
+        Jv = [Jv, diff(translation, robot.get_joint_var(link_no, 0, false))];
     else
         Jv = [Jv, [0;0;0]];
     end

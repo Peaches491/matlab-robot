@@ -18,13 +18,13 @@ for link_no = 1 : robot.num_links()
         gDir = 1;
         P = P + -g * translation(gDir) * massVal  %% gDir is determined by direction of gravity in world frame 
 
-        qdots = robot.get_joint_vars_dot().';
+        qdots = robot.get_joint_vars(1, false).';
         
         %K = K + simplify(1/2 * qdot.' * massVal * (Jvm' * Jvm) * qdot )
         K = K + (1/2 * qdots.' * massVal * (Jvm' * Jvm) * qdots )
         % qdot is the vector of the derivatives of all joint vars
     end
 end
-L = K - P
+L = simplify(K - P, 'ignoreAnalyticConstraints', true)
 end
 

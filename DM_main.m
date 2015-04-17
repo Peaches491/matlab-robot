@@ -1,4 +1,4 @@
-clc; clear all; close all;
+clc; close all;
 
 addpath 'kinematics\'
 addpath 'Plotting\'
@@ -6,10 +6,8 @@ addpath 'Robot\'
 import Robot
 
 
-syms q1 q2 q3 q4 q5 q6;
-sym_vec_dot = [q1 q2 q3 q4 q5 q6];
-syms q1dot q2dot q3dot q4dot q5dot q6dot;
-sym_vec = [q1dot q2dot q3dot q4dot q5dot q6dot];
+syms q1 q2 q3 q4 q5 q6  real;
+sym_vec = [q1 q2 q3 q4 q5 q6];
 dh_params = [  0.000       q1  0.150      -pi/2;
                0.000  q2-pi/2  0.250      pi;
                0.000       q3  0.075   -pi/2;
@@ -22,8 +20,7 @@ r = Robot();
 [rows, columns] = size(dh_params);
 for row = 1 : rows
     r.add_link(dh_params(row, :), ...
-        'joint_var', sym_vec(row), ...
-        'joint_var_dot', sym_vec_dot(row));
+        'joint_var', sym_vec(row));
     
     mass = 1/row + 2.5;
     r.add_mass(row, mass, [0, 0, 0]);
@@ -52,5 +49,5 @@ r2.add_link(F3);
 %r.num_masses(1)
 r.Lagrangian();
 
-%simple_gui2(r);
+simple_gui2(r);
 
