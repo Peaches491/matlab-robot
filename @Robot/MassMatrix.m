@@ -1,10 +1,9 @@
-function [M V G] = MassMatrix(robot)
+function [ M, V, G ] = MassMatrix(robot)
 Tau = robot.MotionEquations();
 qdot = robot.get_joint_vars(1, false);
 qdotdot = robot.get_joint_vars(2, false);
 
 M = [];
-
 
 for t = 1 : length(Tau)
     row = [];
@@ -15,7 +14,7 @@ for t = 1 : length(Tau)
     M = [M; row];
 end
 G = simplify(subs(Tau,[qdot qdotdot],zeros(1,2*length(qdot))));
-V = simplify(Tau - (M*qdotdot' + G))
+V = simplify(Tau - (M*qdotdot' + G));
 
 end
 

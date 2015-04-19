@@ -14,17 +14,18 @@ for link_no = 1 : robot.num_links()
         Jm = simplify(robot.Jacobian('end_link', link_no, 'position', massPos'));
         Jvm = Jm(1:3,:); 
         
-        syms g
+%        syms g
+        g = 9.8;
         gDir = 1;
-        P = P + -g * translation(gDir) * massVal  %% gDir is determined by direction of gravity in world frame 
+        P = P + -g * translation(gDir) * massVal;  %% gDir is determined by direction of gravity in world frame 
 
         qdots = robot.get_joint_vars(1, false).';
         
         %K = K + simplify(1/2 * qdot.' * massVal * (Jvm' * Jvm) * qdot )
-        K = K + (1/2 * qdots.' * massVal * (Jvm' * Jvm) * qdots )
+        K = K + (1/2 * qdots.' * massVal * (Jvm' * Jvm) * qdots );
         % qdot is the vector of the derivatives of all joint vars
     end
 end
-L = simplify(K - P, 'ignoreAnalyticConstraints', true)
+L = simplify(K - P, 'ignoreAnalyticConstraints', true);
 end
 

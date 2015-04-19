@@ -18,7 +18,6 @@ for joint = 1 : length(q)
 
     Taut = diff(At) - Bt;
     Tau = [Tau; simplify(subs(Taut, [qt qtdot qtdotdot], [q qdot qdotdot]))];
-
 end
 
 

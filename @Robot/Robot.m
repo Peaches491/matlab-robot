@@ -32,6 +32,26 @@ classdef Robot < handle
         function [T] = has_joint_var(obj, link_no, order, is_time)
             T = ~isempty(obj.get_joint_var(link_no, order, is_time));
         end
+        
+        function [T] = get_joint_torques(obj)
+            T = [];
+            for q_idx = 1:obj.num_links()
+                T = [T, obj.dh_params(q_idx).tau];
+            end
+        end
+        
+        function [T] = state_variables(obj, is_derivative)
+            T = [];
+            if is_derivative
+                for q_idx = 1:obj.num_links()
+                    T = [T, obj.dh_params(q_idx).qd, obj.dh_params(q_idx).qdd];
+                end
+            else
+                for q_idx = 1:obj.num_links()
+                    T = [T, obj.dh_params(q_idx).q, obj.dh_params(q_idx).qd];
+                end
+            end
+        end
     end
 end
 

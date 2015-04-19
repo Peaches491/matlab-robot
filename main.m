@@ -7,6 +7,8 @@ addpath 'Robot/'
 syms theta1 theta2 real; % theta3;
 syms theta1d theta2d real;
 syms l1 l2 real; % l3;
+l1 = 0.8;
+l2 = 0.6;
 F1 = [0, theta1, l1,  0];
 F2 = [0, theta2, l2, 0];
 
@@ -33,8 +35,17 @@ J = simplify(r.Jacobian());
 
 
 %% Find Jacobian for each point mass
-syms l1 lc1 l2 lc2 real;
-syms m1 m2 mL real;
+%syms l1 lc1 l2 lc2 real;
+%syms m1 m2 mL real;
+
+m1 = 1;
+m2 = 1;
+m3 = 1;
+mL = 1;
+l1 = 1;
+l2 = 1;
+lc1 = 0.5;
+lc2 = 0.5;
 
 pos1 = [-(l1-lc1); 0; 0; 1];
 pos2 = [-(l2-lc2); 0; 0; 1];
@@ -137,4 +148,15 @@ Tau = [M11, M12; M21, M22] * qdotdot' + [V1; V2] + [G1; G2];
 
 %simplify(M11 == l1^2*m2 + l1^2*mL + l2^2*mL + lc1^2*m1 + lc2^2*m2 + 2*l1*l2*mL*cos(theta2) + 2*l1*lc2*m2*cos(theta2));
 
+
+
+%% State Space format
+clc;
+
 [M, V, G] = r.MassMatrix();
+
+M*qdotdot' 
+V*qdot
+
+%qdd = -1*inv(M)*(zeros(2, 2) - V*qdot)
+%simple_gui2(r);
