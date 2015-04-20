@@ -86,6 +86,9 @@ taus
 clc;
 
 
+[M, V, G] = r.MassMatrix();
+
+
 A = sym(zeros(numel(x)));
 for eq_idx = 1:numel(xd)
     for var_idx = 1:numel(x)
@@ -102,25 +105,23 @@ for eq_idx = 1:numel(xd)
 end
 B
 
-eq_pt = [0 0 0 0 0 0]
 
-A = eval(subs(A, [r.get_joint_vars(0, false), ...
+delta = 0.01;
+subs_vec = [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], eq_pt))
+    r.get_joint_torques()]
+tmp_state = [delta 0 0 0 0 0]
+eq_pt = [-pi/2 0 0 0 0 0]
+x_0 = [2*pi/3 - delta, 0, 5*pi/6, 0]
+t_step = 0.01
 
-B = eval(subs(B, [r.get_joint_vars(0, false), ...
-    r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], eq_pt))
+A = eval(subs(A, subs_vec, eq_pt))
+B = eval(subs(B, subs_vec, eq_pt))
 
+ss_eq = A*x' + B*taus'
 
-delta = 2*pi;
-eval(subs(xd, [r.get_joint_vars(0, false), ...
-    r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [delta 0 0 0 0 0]))
-
-eval(subs(A*x' + B*taus', [r.get_joint_vars(0, false), ...
-    r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [delta 0 0 0 0 0]))
+eval(subs(xd, subs_vec, tmp_state))
+eval(subs(ss_eq, subs_vec, tmp_state))
 
 C = zeros(4);
 C(1, 1) = 1;
@@ -130,22 +131,16 @@ C = eye(4)
 H = ss(A,B,C,0);
 
 close all;
-t = 0 :0.0001: 1.0;
+t = 0:t_step:10.0;
 u = zeros(2, numel(t));
-lsim(H,u,t, [2*pi, 0, 0, 0]);
+lsim(H, u, t, x_0)
+out = lsim(H, u, t, x_0);
 
-%simple_gui2(r);
+figure()
+plot(t, out)
 
+simple_gui2(r, out(:, 1:2:3), t_step);
 
-%%
-clc;
-eq = struct();
-for eq_no = 2:2:4
-   eq.(strcat(['eq' num2str(eq_no)])) = [char(x(eq_no)) ' = ' char(xd(eq_no))];
-end
-
-xd_var = r.state_variables(true);
-[M, K, I] = eom2ss(eq, x(2:2:4), xd_var(2:2:4), taus)
 
 
 

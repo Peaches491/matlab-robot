@@ -1,4 +1,4 @@
-function [f] = simple_gui2(robot)
+function [f] = simple_gui2(robot, out, t_step)
 % SIMPLE_GUI2 Select a data set from the pop-up menu, then
 % click one of the plot-type push buttons. Clicking the button
 % plots the selected data in the axes.
@@ -19,7 +19,7 @@ ha.Units = 'normalized';
 % Create a plot in the axes.
 current_data = zeros(1, robot.num_joints());
 tf_scale = 0.10;
-plotSetup(0.90, 148, 15, 'perspective');
+plotSetup(1.5, 148, 15, 'perspective');
 plotArm(robot, current_data);
 
 for link = 0 : robot.num_links()
@@ -60,13 +60,9 @@ movegui(f,'center');
 
 % Make the window visible.
 f.Visible = 'on';
+f = flip(findobj(gcf()));
 
-
-    
-function update_plot(link, value)
-    current_data(link) = value*2*pi - pi;
-    f = flip(findobj(gcf()));
-    
+function redraw()
     plotArm_update(f(1:2), robot, current_data);
 
     for link = 0 : robot.num_links()
@@ -75,6 +71,11 @@ function update_plot(link, value)
 
         plotCoord_update(f(link+3), p, R, tf_scale);
     end
+end
+    
+function update_plot(link, value)
+    current_data(link) = value*2*pi - pi;
+    redraw();
 end
 
 function slider_callback(source, eventdata, link)
@@ -85,5 +86,15 @@ function surfbutton_Callback(source,eventdata)
     current_data = zeros(1, robot.num_links());
     update_plot(1, 0.5);
 end
+
+
+pause(2);
+
+for t = 1:size(out, 1)
+    current_data = out(t, :);
+    redraw();
+    pause(t_step)
+end
+
 
 end
