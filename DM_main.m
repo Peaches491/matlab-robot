@@ -111,10 +111,11 @@ subs_vec = [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
     r.get_joint_torques()]
 tmp_state = [delta 0 0 0 0 0]
-eq_pt = [-pi/2 0 0 0 0 0]
-x_0 = [2*pi/3 - delta, 0, 5*pi/6, 0]
+x_0 = [2*pi/3 - delta, 0, 0, 0]
 t_step = 0.01
 
+
+eq_pt = [pi 0 0 0 0 0]
 A = eval(subs(A, subs_vec, eq_pt))
 B = eval(subs(B, subs_vec, eq_pt))
 

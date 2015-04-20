@@ -16,7 +16,7 @@ for link_no = 1 : robot.num_links()
         
 %        syms g
         g = 9.8;
-        gDir = 2;
+        gDir = 1;
         P = P + -g * translation(gDir) * massVal;  %% gDir is determined by direction of gravity in world frame 
 
         qdots = robot.get_joint_vars(1, false).';
