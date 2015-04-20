@@ -73,34 +73,55 @@ r.add_mass(2, 1, [0; 0; 0]');
 
 %% 
 clc;
-x = r.state_variables(false);
-xd = r.state_vector(r.get_joint_torques()');
-taus = r.get_joint_torques();
+x = r.state_variables(false)';
 
-xd'
+% No Feedback
+u = r.get_joint_torques()';
+
+% P Controller
+q_set = [pi/4, 0];
+P = (eye(2)*10);
+u = P*(r.get_joint_vars(0, false) - q_set)';
+
+% PD Controller
+%q_set = [pi/2, 0, 0, 0]';
+%P = [10 0 0  0;
+%      0 0 0  0;
+%      0 0 10 0;
+%      0 0 0  0;];
+%D = [0  0 0  0;
+%     0 10 0  0;
+%     0  0 0  0;
+%     0  0 0 10;];
+%D = (eye(4)*0.2);
+%u = P*(x - q_set) + D*x
+
+xd_open = r.state_vector(r.get_joint_torques()');
+taus = r.get_joint_torques()'
+
+xd_open'
 x
 r.state_variables(true)
 taus
 
+
 %%
 clc;
 
-
 [M, V, G] = r.MassMatrix();
 
-
 A = sym(zeros(numel(x)));
-for eq_idx = 1:numel(xd)
+for eq_idx = 1:numel(xd_open)
     for var_idx = 1:numel(x)
-        A(eq_idx, var_idx) = diff(xd(eq_idx), x(var_idx));
+        A(eq_idx, var_idx) = diff(xd_open(eq_idx), x(var_idx));
     end
 end
 A
 
 B = sym(zeros(numel(x), numel(taus)));
-for eq_idx = 1:numel(xd)
+for eq_idx = 1:numel(xd_open)
     for var_idx = 1:numel(taus)
-        B(eq_idx, var_idx) = diff(xd(eq_idx), taus(var_idx));
+        B(eq_idx, var_idx) = diff(xd_open(eq_idx), taus(var_idx));
     end
 end
 B
@@ -111,7 +132,7 @@ subs_vec = [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
     r.get_joint_torques()]
 tmp_state = [delta 0 0 0 0 0]
-x_0 = [2*pi/3 - delta, 0, 0, 0]
+x_0 = [delta, 0, 0, 0]
 t_step = 0.01
 
 
@@ -119,9 +140,9 @@ eq_pt = [pi 0 0 0 0 0]
 A = eval(subs(A, subs_vec, eq_pt))
 B = eval(subs(B, subs_vec, eq_pt))
 
-ss_eq = A*x' + B*taus'
+ss_eq = A*x + B*u
 
-eval(subs(xd, subs_vec, tmp_state))
+eval(subs(xd_open, subs_vec, tmp_state))
 eval(subs(ss_eq, subs_vec, tmp_state))
 
 C = zeros(4);
@@ -133,14 +154,14 @@ H = ss(A,B,C,0);
 
 close all;
 t = 0:t_step:10.0;
-u = zeros(2, numel(t));
-lsim(H, u, t, x_0)
-out = lsim(H, u, t, x_0);
+%u = zeros(2, numel(t));
+%lsim(H, u, t, x_0)
+%out = lsim(H, u, t, x_0);
 
-figure()
-plot(t, out)
+%figure()
+%plot(t, out)
 
-simple_gui2(r, out(:, 1:2:3), t_step);
+%simple_gui2(r, out(:, 1:2:3), t_step);
 
 
 
