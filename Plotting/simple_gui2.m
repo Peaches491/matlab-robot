@@ -19,7 +19,7 @@ ha.Units = 'normalized';
 % Create a plot in the axes.
 current_data = zeros(1, robot.num_joints());
 tf_scale = 0.10;
-plotSetup(1.5, 148, 15, 'perspective');
+plotSetup(1.5, 135, 45, 'perspective');
 plotArm(robot, current_data);
 
 for link = 0 : robot.num_links()
@@ -87,14 +87,16 @@ function surfbutton_Callback(source,eventdata)
     update_plot(1, 0.5);
 end
 
+function replay(source,eventdata)
+    for t = 1:size(out, 1)
+        current_data = out(t, :);
+        redraw();
+        pause(t_step)
+    end
+end
 
 pause(2);
 
-for t = 1:size(out, 1)
-    current_data = out(t, :);
-    redraw();
-    pause(t_step)
-end
-
+replay();
 
 end

@@ -70,8 +70,7 @@ r.add_mass(1, 1, [-(0.3); 0; 0]');
 r.add_mass(2, 1, [-(0.2); 0; 0]');
 r.add_mass(2, 1, [0; 0; 0]');
 
-
-%% 
+%%
 clc;
 x = r.state_variables(false)';
 
@@ -132,7 +131,7 @@ subs_vec = [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
     r.get_joint_torques()]
 tmp_state = [delta 0 0 0 0 0]
-x_0 = [pi/2 + delta, 0, pi/4, 0]
+x_0 = [-pi/2 + delta, 0, pi/4, 0]
 t_step = 0.01
 
 
@@ -152,16 +151,13 @@ C = eye(4)
 
 H = ss(A,B,C,0);
 
-close all;
-%lsim(H, u, t, x_0)
-
 t = 0:t_step:10.0;
 u_sim = zeros(2, numel(t));
 out = lsim(H, u_sim, t, x_0);
 
-%figure()
-%plot(t, out)
 
+close all;
+lsim(H, u_sim, t, x_0)
 simple_gui2(r, out(:, 1:2:3), t_step);
 
 
