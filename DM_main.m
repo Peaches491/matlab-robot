@@ -50,7 +50,7 @@ r2.add_link(F3);
 %r.num_masses(1)
 r.Lagrangian();
 
-simple_gui2(r);
+%simple_gui2(r);
 
 
 
@@ -79,9 +79,9 @@ x = r.state_variables(false)';
 u = r.get_joint_torques()';
 
 % P Controller
-q_set = [pi/4, 0];
-P = (eye(2)*10);
-u = P*(r.get_joint_vars(0, false) - q_set)';
+%q_set = [pi/4, 0];
+%P = (eye(2)*10);
+%u = P*(r.get_joint_vars(0, false) - q_set)';
 
 % PD Controller
 %q_set = [pi/2, 0, 0, 0]';
@@ -132,7 +132,7 @@ subs_vec = [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
     r.get_joint_torques()]
 tmp_state = [delta 0 0 0 0 0]
-x_0 = [delta, 0, 0, 0]
+x_0 = [pi/2 + delta, 0, pi/4, 0]
 t_step = 0.01
 
 
@@ -153,15 +153,16 @@ C = eye(4)
 H = ss(A,B,C,0);
 
 close all;
-t = 0:t_step:10.0;
-%u = zeros(2, numel(t));
 %lsim(H, u, t, x_0)
-%out = lsim(H, u, t, x_0);
+
+t = 0:t_step:10.0;
+u_sim = zeros(2, numel(t));
+out = lsim(H, u_sim, t, x_0);
 
 %figure()
 %plot(t, out)
 
-%simple_gui2(r, out(:, 1:2:3), t_step);
+simple_gui2(r, out(:, 1:2:3), t_step);
 
 
 
