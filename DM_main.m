@@ -102,23 +102,37 @@ for eq_idx = 1:numel(xd)
 end
 B
 
-A = subs(A, [r.get_joint_vars(0, false), ...
+eq_pt = [0 0 0 0 0 0]
+
+A = eval(subs(A, [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [pi 0 0 0 0 0])
+    r.get_joint_torques()], eq_pt))
 
-B = subs(B, [r.get_joint_vars(0, false), ...
+B = eval(subs(B, [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [pi 0 0 0 0 0])
+    r.get_joint_torques()], eq_pt))
 
 
+delta = 2*pi;
 eval(subs(xd, [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [0.1 0 0 0 0 0]))
+    r.get_joint_torques()], [delta 0 0 0 0 0]))
 
 eval(subs(A*x' + B*taus', [r.get_joint_vars(0, false), ...
     r.get_joint_vars(1, false), ...
-    r.get_joint_torques()], [0.1 0 0 0 0 0]))
+    r.get_joint_torques()], [delta 0 0 0 0 0]))
 
+C = zeros(4);
+C(1, 1) = 1;
+C(3, 3) = 1;
+C = eye(4)
+
+H = ss(A,B,C,0);
+
+close all;
+t = 0 :0.0001: 1.0;
+u = zeros(2, numel(t));
+lsim(H,u,t, [2*pi, 0, 0, 0]);
 
 %simple_gui2(r);
 
