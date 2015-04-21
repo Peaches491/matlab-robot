@@ -129,7 +129,7 @@ C = eye(4)
 %% Linearize Matrices
 delta = 0.01;
 subs_vec = [x', r.get_joint_torques()]
-eq_pt = [0 0 0 0 0 0]
+eq_pt = [pi 0 0 0 0 0]
 A = eval(subs(A, subs_vec, eq_pt))
 B = eval(subs(B, subs_vec, eq_pt))
 
@@ -142,16 +142,22 @@ eval(subs(xd_open, subs_vec, tmp_state))
 eval(subs(ss_eq, subs_vec, tmp_state))
 
 
-%% Simulate
+%% Simulate using LSim
+close all;
 
 x_0 = [-pi/2 + delta, 0, pi/4, 0]
 t_step = 0.01
 
 t = 0:t_step:5.0;
-%H = ss(A,B,C,0);
-%u_sim = zeros(2, numel(t));
-%out = lsim(H, u_sim, t, x_0);
+H = ss(A,B,C,0);
+u_sim = zeros(2, numel(t));
+l_sim_out = lsim(H, u_sim, t, x_0);
+lsim(H, u_sim, t, x_0)
 
+
+simple_gui2(r, l_sim_out(:, 1:2:3), t_step);
+
+%% Simulate using Iterated SS Equations
 out = zeros(numel(x), numel(t));
 
 current_state = x_0';
@@ -166,7 +172,6 @@ for i = 1:numel(t)
     out(:, i) = current_state;
 end
 
-close all;
 %lsim(H, u_sim, t, x_0)
 
 plot(out')
