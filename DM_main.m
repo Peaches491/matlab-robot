@@ -104,10 +104,8 @@ r.state_variables(true)
 taus
 
 
-%%
+%% Construct SS Matrices, A, B, and C
 clc;
-
-[M, V, G] = r.MassMatrix();
 
 A = sym(zeros(numel(x)));
 for eq_idx = 1:numel(xd_open)
@@ -125,40 +123,54 @@ for eq_idx = 1:numel(xd_open)
 end
 B
 
+C = eye(4)
 
+
+%% Linearize Matrices
 delta = 0.01;
-subs_vec = [r.get_joint_vars(0, false), ...
-    r.get_joint_vars(1, false), ...
-    r.get_joint_torques()]
-tmp_state = [delta 0 0 0 0 0]
-x_0 = [-pi/2 + delta, 0, pi/4, 0]
-t_step = 0.01
-
-
-eq_pt = [pi 0 0 0 0 0]
+subs_vec = [x', r.get_joint_torques()]
+eq_pt = [0 0 0 0 0 0]
 A = eval(subs(A, subs_vec, eq_pt))
 B = eval(subs(B, subs_vec, eq_pt))
 
-ss_eq = A*x + B*u
+ss_eq = A*x + B*u;
 
+
+%% Compare Linearized and Non-Linearized
+tmp_state = [delta 0 0 0 0 0]
 eval(subs(xd_open, subs_vec, tmp_state))
 eval(subs(ss_eq, subs_vec, tmp_state))
 
-C = zeros(4);
-C(1, 1) = 1;
-C(3, 3) = 1;
-C = eye(4)
 
-H = ss(A,B,C,0);
+%% Simulate
 
-t = 0:t_step:10.0;
-u_sim = zeros(2, numel(t));
-out = lsim(H, u_sim, t, x_0);
+x_0 = [-pi/2 + delta, 0, pi/4, 0]
+t_step = 0.01
 
+t = 0:t_step:5.0;
+%H = ss(A,B,C,0);
+%u_sim = zeros(2, numel(t));
+%out = lsim(H, u_sim, t, x_0);
+
+out = zeros(numel(x), numel(t));
+
+current_state = x_0';
+
+f = matlabFunction(ss_eq, 'Vars', [x', taus']);
+for i = 1:numel(t)
+    current_state = current_state + ...
+        f(current_state(1), ...
+        current_state(2), ...
+        current_state(3), ...
+        current_state(4), 0, 0)*t_step;
+    out(:, i) = current_state;
+end
 
 close all;
-lsim(H, u_sim, t, x_0)
-simple_gui2(r, out(:, 1:2:3), t_step);
+%lsim(H, u_sim, t, x_0)
+
+plot(out')
+simple_gui2(r, out(1:2:3, :)', t_step);
 
 
 

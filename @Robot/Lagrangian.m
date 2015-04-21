@@ -19,7 +19,7 @@ for link_no = 1 : robot.num_links()
         
         % But, I think you need to pull out the translation section from
         % the TF first, As I did here. 
-        translation = translation(1:3, 4)
+        translation = translation(1:3, 4);
         
         % Then you can do whatever it is you were doing with the 'massPos'
         % vector.
