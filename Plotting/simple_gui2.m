@@ -1,4 +1,4 @@
-function [f] = simple_gui2(robot, out, t_step)
+function [f] = simple_gui2(robot, t, traj, t_step)
 % SIMPLE_GUI2 Select a data set from the pop-up menu, then
 % click one of the plot-type push buttons. Clicking the button
 % plots the selected data in the axes.
@@ -94,11 +94,15 @@ function surfbutton_Callback(source,eventdata)
 end
 
 function replay(source,eventdata)
-    for t = 1:size(out, 1)
-        current_data = out(t, :);
+    traj_idx = 1;
+    start_t = now;
+    while traj_idx <= numel(traj)
+        current_data = traj(traj_idx, :);
         redraw();
-        pause(t_step)
+        pause(t_step);
+        traj_idx = find(t > (now - start_t)*100000, 1, 'first');
     end
+    disp 'Play complete.'
 end
 
 pause(2);
