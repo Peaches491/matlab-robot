@@ -33,12 +33,14 @@ reset_btn = uicontrol('Style', 'pushbutton', ...
     'String', 'Reset', ...
     'Position',[315,0,70,25], ...
     'Callback', @surfbutton_Callback);
+reset_btn.Units = 'normalized';
 
 
-reset_btn = uicontrol('Style', 'pushbutton', ...
+replay_btn = uicontrol('Style', 'pushbutton', ...
     'String', 'Replay', ...
     'Position',[115,0,70,25], ...
     'Callback', @replay);
+replay_btn.Units = 'normalized';
 
 sliders = [];
 for link = 1:robot.num_joints()
@@ -55,7 +57,8 @@ for link = 1:robot.num_joints()
     sliders = [sliders; link_slider];
 end
 
-align([sliders; reset_btn],'Center','None');
+align(sliders,'Center','None');
+align([replay_btn; reset_btn],'Middle','None');
 
 
 
