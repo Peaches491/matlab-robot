@@ -18,6 +18,7 @@ ha.Units = 'normalized';
 
 % Create a plot in the axes.
 current_data = zeros(1, robot.num_joints());
+current_data = traj(1, :);
 tf_scale = 0.10;
 plotSetup(1.5, 135, 45, 'perspective');
 plotArm(robot, current_data);
@@ -94,6 +95,9 @@ function surfbutton_Callback(source,eventdata)
 end
 
 function replay(source,eventdata)
+    current_data = traj(1, :);
+    redraw();
+    pause(1);
     traj_idx = 1;
     start_t = now;
     while traj_idx <= numel(traj)
@@ -104,8 +108,6 @@ function replay(source,eventdata)
     end
     disp 'Play complete.'
 end
-
-pause(2);
 
 replay();
 

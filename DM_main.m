@@ -87,9 +87,9 @@ P = (eye(r.num_links())*10);
 u = P*(r.get_joint_vars(0, false) - q_set)';
 
 % PD Controller
-q_set = [pi/2, 0]';
-P = eye(r.num_links())*10
-D = eye(r.num_links())*2
+q_set = [pi/3, pi/4]';
+P = eye(r.num_links())*75
+D = eye(r.num_links())*18.75
 u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))'
 
 xd_open = r.state_vector(r.get_joint_torques()');
@@ -153,11 +153,7 @@ x_0
 
 ss_eq = A*x + B*u;
 
-q_set = [pi/2, 0]';
-P = eye(r.num_links())*80
-D = eye(r.num_links())*35
-u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))'
-
+q_set = [pi/3, pi/4]';
 f = matlabFunction(ss_eq, 'Vars', [x', taus']);
 
 %%% THIS IS THE ONLY THING I CANT MAKE WORK FOR ARBITRARY STATE VECTORS =[
