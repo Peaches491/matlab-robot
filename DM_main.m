@@ -166,6 +166,9 @@ plot(out.y')
 simple_gui2(r, out.x, out.y(1:2:numel(x), :)', 0.01);
 
 
+%% THE FOLLOWING METHODS ARE INFERIOR. 
+
+
 %% Simulate using LSim
 close all;
 
