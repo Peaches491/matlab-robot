@@ -2,7 +2,7 @@ function xdot = state_vector(r, taus)
 qdd = r.get_joint_vars(2, false);
 qd = r.get_joint_vars(1, false);
 
-[M, V, G] = r.MassMatrix()
+[M, V, G] = r.MassMatrix();
 
 qdd = -1*(M\(taus - V.*qd' - G));
 

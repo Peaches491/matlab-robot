@@ -63,11 +63,8 @@ end
 
 if has_config
     params = [p.Results.config];
-    
     func = robot.function_cache{idx_1, idx_2};
-    params = mat2cell(params,1,ones(1,numel(params)));
-    
-    tf = func( params{:} );
+    tf = param_expand(params, func);
 else 
     tf = robot.sym_cache{idx_1, idx_2};
 end
