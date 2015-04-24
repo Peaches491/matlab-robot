@@ -118,6 +118,17 @@ u_names{numel(u_names)+1} = 'PD-G';
 %u_vec = [u_vec, u];
 %u_names{numel(u_names)+1} = 'G Only';
 
+% PID Controller
+[M, V, G] = r.MassMatrix();
+P = eye(r.num_links())*75;
+I = eye(r.num_links())*0.5;
+D = eye(r.num_links())*18.75;
+u = P*(r.get_joint_vars(0, false)' - q_set) + ...
+    I*(r.get_joint_vars(0, false)' - q_set) + ...
+    D*(r.get_joint_vars(1, false))';
+u_vec = [u_vec, u];
+u_names{numel(u_names)+1} = 'PD+G';
+
 x
 state_vector_dot = r.state_variables(true)
 
@@ -133,9 +144,9 @@ x_0(3) =  -5*pi/6;
 size(u_vec)
 
 
-%%
 close all;
-for u_idx = 1:numel(u_vec)  
+profile on;
+for u_idx = 1:size(u_vec, 2)  
     u = u_vec(:, u_idx)
     
     % Simulate
@@ -144,7 +155,7 @@ for u_idx = 1:numel(u_vec)
     % Calculate Errors   
     desired = q_set';
     err = bsxfun(@minus, out.y(1:2:end, :)', desired); 
-    err = sqrt(sum(err.^2, 2))
+    err = sqrt(sum(err.^2, 2));
     final_error = out.y(1:2:end, end)' - desired
     
     % Plot Errors
