@@ -75,94 +75,167 @@ r.add_mass(2, 1, [-(0.2); 0; 0]');
 
 
 % Construct Controller
-x = r.state_variables(false)';
-q_set = (ones(1, r.num_links())*pi/4)';
-u_vec = [];
-u_names = {};
+x = r.state_variables(false, false)';
+x_0_joints = [-pi/2, -5*pi/6];
+
+q_set = [(ones(1, r.num_links())*pi/4)'];
+
+
+ctrl_idx = 1;
+ctrl_struct = struct('x', [], ...
+                     'eqs', [], ...
+                     'u', []);
 
 % No Feedback
-%u = r.get_joint_torques()';
-%u_vec = [u_vec, u]
+if false
+    u = r.get_joint_torques()';
+    u_vec = [u_vec, u];
+    u_names{numel(u_names)+1} = 'None';
+end
 
 % P Controller
-%P = (eye(r.num_links())*10);
-%u = P*(r.get_joint_vars(0, false)' - q_set);
-%u_vec = [u_vec, u];
+if false
+    P = (eye(r.num_links())*10);
+    u = P*(r.get_joint_vars(0, false)' - q_set);
+    u_vec = [u_vec, u];
+    u_names{numel(u_names)+1} = 'P';
+end
 
 % PD Controller
-P = eye(r.num_links())*75;
-D = eye(r.num_links())*18.75;
-u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))';
-u_vec = [u_vec, u];
-u_names{numel(u_names)+1} = 'PD';
+if false
+    P = eye(r.num_links())*75;
+    D = eye(r.num_links())*18.75;
+    u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))';
+    
+    x_0 = zeros(numel(x), 1);
+    x_0(1) = x_0_joints(1);
+    x_0(3) = x_0_joints(2);
+    
+    ctrl_struct(ctrl_idx).eqs = r.state_vector(r.get_joint_torques()');
+    ctrl_struct(ctrl_idx).x = r.state_variables(false, false);
+    ctrl_struct(ctrl_idx).outs = zeros(numel(ctrl_struct(ctrl_idx).x), 1);
+    ctrl_struct(ctrl_idx).outs(1) = 1;
+    ctrl_struct(ctrl_idx).outs(3) = 1;
+    ctrl_struct(ctrl_idx).u = u;
+    ctrl_struct(ctrl_idx).x_0 = x_0;
+    ctrl_struct(ctrl_idx).name = 'PD';
+    
+    ctrl_idx = ctrl_idx + 1;
+end
 
 % PD+G Controller
-[M, V, G] = r.MassMatrix();
-P = eye(r.num_links())*75;
-D = eye(r.num_links())*18.75;
-u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))' + G;
-u_vec = [u_vec, u];
-u_names{numel(u_names)+1} = 'PD+G';
+if false
+    [M, V, G] = r.MassMatrix();
+    P = eye(r.num_links())*75;
+    D = eye(r.num_links())*18.75;
+    u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))' + G;
+    u_vec = [u_vec, u];
+    u_names{numel(u_names)+1} = 'PD+G';
+end
 
 % PD-G Controller
-[M, V, G] = r.MassMatrix();
-P = eye(r.num_links())*75;
-D = eye(r.num_links())*18.75;
-u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))' - G;
-u_vec = [u_vec, u];
-u_names{numel(u_names)+1} = 'PD-G';
+if false
+    [M, V, G] = r.MassMatrix();
+    P = eye(r.num_links())*75;
+    D = eye(r.num_links())*18.75;
+    u = P*(r.get_joint_vars(0, false)' - q_set) + D*(r.get_joint_vars(1, false))' - G;
+    u_vec = [u_vec, u];
+    u_names{numel(u_names)+1} = 'PD-G';
+end
 
 % G Only Controller  %%%%%%%%% THIS FREAKS OUT. I DON'T KNOW WHY.
-%[M, V, G] = r.MassMatrix();
-%u = 0.1*G;
-%u_vec = [u_vec, u];
-%u_names{numel(u_names)+1} = 'G Only';
+if false
+    [M, V, G] = r.MassMatrix();
+    u = 0.1*G;
+    u_vec = [u_vec, u];
+    u_names{numel(u_names)+1} = 'G Only';
+end
 
 % PID Controller
-[M, V, G] = r.MassMatrix();
-P = eye(r.num_links())*75;
-I = eye(r.num_links())*0.5;
-D = eye(r.num_links())*18.75;
-u = P*(r.get_joint_vars(0, false)' - q_set) + ...
-    I*(r.get_joint_vars(0, false)' - q_set) + ...
-    D*(r.get_joint_vars(1, false))';
-u_vec = [u_vec, u];
-u_names{numel(u_names)+1} = 'PD+G';
+if true
+    pid_x = r.state_variables(false, true);
+    ctrl_struct(ctrl_idx).x = pid_x;
+    
+    pid_eqs = [-1*pid_x(2), pid_x(3), 0, ...
+               -1*pid_x(5), pid_x(6), 0, ];
+    v = r.state_vector(r.get_joint_torques()');
+    pid_eqs(3) = v(2);
+    pid_eqs(6) = v(4);
+    ctrl_struct(ctrl_idx).eqs = pid_eqs;
+    
+    pid_q_set = zeros(size(pid_x, 2), 1);
+    pid_q_set(2) = q_set(1);
+    pid_q_set(5) = q_set(2);
+     
+    k_p = 45;
+    k_i = -20.8;
+    k_d = 3.0;
+    
+    %[M, V, G] = r.MassMatrix();
+    K = zeros(2, numel(pid_x));
+    K(1, 1) = k_i;
+    K(1, 2) = k_p;
+    K(1, 3) = k_d;
+    K(2, 4) = k_i;
+    K(2, 5) = k_p;
+    K(2, 6) = k_d;
+    
+    u = K*(pid_x' - pid_q_set);
+    %u_vec = [u_vec, u];
+    %u_names{numel(u_names)+1} = 'PID';
+    
+    ctrl_struct(ctrl_idx).u = u;
+    
+    x_0 = zeros(numel(pid_x), 1);
+    x_0(2) = x_0_joints(1);
+    x_0(5) = x_0_joints(2);
+    ctrl_struct(ctrl_idx).x_0 = x_0;
+    ctrl_struct(ctrl_idx).outs = [0, 1, 0, 0, 1, 0];
+    ctrl_struct(ctrl_idx).desired = q_set;
+    ctrl_struct(ctrl_idx).outs = [1, 1, 1, 1, 1, 1];
+    ctrl_struct(ctrl_idx).desired = pid_q_set;
+    ctrl_struct(ctrl_idx).name = {'I1', 'P1', 'D1', 'I2', 'P2', 'D2'};
+    
+    ctrl_idx = ctrl_idx+1;
+end
 
-x
-state_vector_dot = r.state_variables(true)
+ctrl_struct(1)
 
-subs_vec = [x', r.get_joint_torques()];
-eq_pt = zeros(size(subs_vec));
-eq_pt(1) = pi;
-
-delta = 0.0;
-x_0 = zeros(numel(x), 1);
-x_0(1) = -pi/2 + delta;
-x_0(3) =  -5*pi/6;
-
-size(u_vec)
-
+size(ctrl_struct)
 
 close all;
-profile on;
-for u_idx = 1:size(u_vec, 2)  
-    u = u_vec(:, u_idx)
+%profile on;
+for u_idx = 1:numel(ctrl_struct)
+    u = ctrl_struct(u_idx).u
+    x = ctrl_struct(u_idx).x
+    outs = ctrl_struct(u_idx).outs
+    x_0 = ctrl_struct(u_idx).x_0
+    eqs = ctrl_struct(u_idx).eqs
+    desired = ctrl_struct(u_idx).desired'
+    
+    subs_vec = [x, r.get_joint_torques()]
+    eq_pt = zeros(size(subs_vec));
+    eq_pt(2) = pi;
+
     
     % Simulate
-    out = r.simulate(x_0, u, eq_pt);
+    [out, C] = r.simulate(x, eqs, x_0, u, eq_pt, outs);
 
     % Calculate Errors   
-    desired = q_set';
-    err = bsxfun(@minus, out.y(1:2:end, :)', desired); 
-    err = sqrt(sum(err.^2, 2));
-    final_error = out.y(1:2:end, end)' - desired
+    out_y = (C*out.y)';
+    err = bsxfun(@minus, out_y, desired); 
+    %err = sqrt(sum(err.^2, 2));
+    final_error = out_y(end, :) - desired
     
     % Plot Errors
     hold on;
     plot(out.x', err)
+    
+    %simple_gui2(r, out.x, out_y, 0.01);
+    
+    legend(ctrl_struct(u_idx).name)
 end
-legend(u_names)
+%legend({ctrl_struct.name})
 
 %%
 simple_gui2(r, out.x, out.y(1:2:numel(x), :)', 0.01);

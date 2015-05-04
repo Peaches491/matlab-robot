@@ -40,14 +40,20 @@ classdef Robot < handle
             end
         end
         
-        function [T] = state_variables(obj, is_derivative)
+        function [T] = state_variables(obj, is_derivative, add_integral)
             T = [];
             if is_derivative
                 for q_idx = 1:obj.num_links()
+                    if add_integral
+                        T = [T, obj.dh_params(q_idx).q];
+                    end
                     T = [T, obj.dh_params(q_idx).qd, obj.dh_params(q_idx).qdd];
                 end
             else
                 for q_idx = 1:obj.num_links()
+                    if add_integral
+                        T = [T, obj.dh_params(q_idx).qint];
+                    end
                     T = [T, obj.dh_params(q_idx).q, obj.dh_params(q_idx).qd];
                 end
             end
